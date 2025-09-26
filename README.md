@@ -25,9 +25,9 @@ Once the roles are identified, the system will create a team of 6 Pokémon that 
 - [x] Make Pokemon data classes
 - [x] Build PokeAPI client to get Pokemon info
 - [x] Build Smogon client to get competitive sets
-- [ ] Figure out what roles Pokemon can fill
-- [ ] Score Pokemon based on team needs
-- [ ] Build the main team building logic
+- [x] Figure out what roles Pokemon can fill
+- [x] Score Pokemon based on team needs
+- [x] Build the main team building logic
 - [ ] Add caching to make it faster
 - [ ] Add parallel data fetching
 - [ ] Make Showdown team format output
