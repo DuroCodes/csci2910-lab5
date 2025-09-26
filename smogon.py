@@ -26,7 +26,7 @@ def get_pokemon_sets(pokemon_name: str, gen=8) -> list[PokemonSet]:
 
     if pokemon_name in sets_data:
         for tier_name, tier_data in sets_data[pokemon_name].items():
-            if tier_name.lower() in ["almostanyability", "godlygift"]:
+            if tier_name.lower() in ["almostanyability", "godlygift", "balancedhackmon"]:
                 continue
 
             for set_name, set_data in tier_data.items():
