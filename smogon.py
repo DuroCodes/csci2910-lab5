@@ -34,7 +34,7 @@ def get_pokemon_sets(pokemon_name: str, gen=8) -> list[PokemonSet]:
                 moves = [get_first_item(move) for move in set_data.get("moves", [])]
                 item = get_first_item(set_data.get("item", ""))
                 ability = get_first_item(set_data.get("ability", ""))
-                nature = set_data.get("nature", "")
+                nature = get_first_item(set_data.get("nature", ""))
 
                 pokemon_sets.append(
                     PokemonSet(
