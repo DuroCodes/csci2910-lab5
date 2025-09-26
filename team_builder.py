@@ -1,5 +1,6 @@
 import enum
-from models import PokemonSet
+from models import Pokemon, PokemonSet, TeamMember
+
 
 @enum.unique
 class Role(enum.Enum):
@@ -11,7 +12,7 @@ class Role(enum.Enum):
     SETUP_SWEEPER = "setup_sweeper"
 
 
-def identify_roles(pokemon_set: PokemonSet) -> list[str]:
+def identify_roles(pokemon_set: PokemonSet) -> list[Role]:
     roles = []
     moves = [move.lower() for move in pokemon_set.moves]
 
@@ -37,3 +38,26 @@ def identify_roles(pokemon_set: PokemonSet) -> list[str]:
     return roles
 
 
+def score_pokemon(
+    pokemon: Pokemon,
+    pokemon_set: PokemonSet,
+    team_needs: dict[str, list[str]],
+    current_team: list[TeamMember],
+) -> float:
+    score = 0.0
+    roles = identify_roles(pokemon_set)
+
+    role_scores = {
+        Role.HAZARD_SETTER: 3.0,
+        Role.HAZARD_REMOVER: 3.0,
+        Role.SPEED_CONTROL: 2.0,
+        Role.PIVOT: 2.0,
+        Role.UTILITY: 1.5,
+        Role.SETUP_SWEEPER: 2.0,
+    }
+
+    score += sum(role_scores[role] for role in roles if role in team_needs)
+    current_types = [type for member in current_team for type in member.pokemon.types]
+    score -= 0.5 * sum(1 for type in pokemon.types if type in current_types)
+
+    return score
