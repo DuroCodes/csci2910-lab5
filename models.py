@@ -1,11 +1,13 @@
 from dataclasses import dataclass
 
+
 @dataclass
 class Pokemon:
     name: str
     types: list[str]
     abilities: list[str]
     stats: dict[str, int]
+
 
 @dataclass
 class PokemonSet:
@@ -16,8 +18,8 @@ class PokemonSet:
     nature: str
     evs: dict[str, int]
 
+
 @dataclass
 class TeamMember:
     pokemon: Pokemon
     set: PokemonSet
-
