@@ -84,29 +84,21 @@ def get_type_coverage_needs(seed_pokemon: Pokemon) -> list[str]:
 
 
 def build_team(seed_name: str) -> list[TeamMember]:
-    print(f"Building a team with seed: {seed_name}\n")
-
     print(f"Fetching data for {seed_name}...")
     seed_pokemon = get_pokemon(seed_name)
     if not seed_pokemon:
         print(f"Could not find Pokémon: {seed_name}")
-        exit(1)  # can't do much without the seed pokemon
+        return []
 
-    print(f"Found {seed_pokemon.name} ({seed_pokemon.types})")
-
-    print(f"Fetching sets for {seed_pokemon.name}...")
-    seed_sets = get_pokemon_sets(seed_pokemon.name.title())  # smogon format
+    seed_sets = get_pokemon_sets(seed_pokemon.name.title())
     if not seed_sets:
-        print(f"No sets found for {seed_pokemon.name}")
-        exit(1)  # can't build a team without a seed set
+        print(f"No sets found for {seed_pokemon.name} in gen8")
+        return []
 
-    print(f"Found {len(seed_sets)} competitive sets")
-
-    # use first set as seed set
     seed_set = seed_sets[0]
     team = [TeamMember(seed_pokemon, seed_set)]
 
-    print(f"Selected set: {seed_set.name}")
+    print(f"\nSelected Set: {seed_set.name} ({seed_pokemon.name})")
     print(f"├─ Moves: {', '.join(seed_set.moves[:3])}{'...' if len(seed_set.moves) > 3 else ''}")
     print(f"├─ Item: {seed_set.item}")
     print(f"╰─ Ability: {seed_set.ability}")
@@ -121,37 +113,40 @@ def build_team(seed_name: str) -> list[TeamMember]:
         Role.TYPE_COVERAGE: get_type_coverage_needs(seed_pokemon),
     }
 
+    seed_roles = identify_roles(seed_set)
     for role in team_needs:
-        if role not in identify_roles(seed_set):
+        if role not in seed_roles and role != Role.TYPE_COVERAGE:
             team_needs[role].append(1)
 
-    print(f"Team needs: {team_needs}")
-    print(f"Type coverage needed: {team_needs[Role.TYPE_COVERAGE]}")
+    print("\nTeam Needs:")
+    print(f"├─ Roles needed: {', '.join([role.value for role in team_needs.keys()])}")
+    print(f"╰─ Types needed: {', '.join(team_needs[Role.TYPE_COVERAGE])}")
 
-    print("Fetching available Pokémon in generation...")
+    print("\nFetching available Pokémon...")
     available_pokemon = get_available_pokemon_names()
-    print(f"Available Pokémon: {len(available_pokemon)}")
+    print(f"╰─ Found {len(available_pokemon)} available Pokémon")
 
-    print(f"Building team slot {len(team) + 1}/6...")
-
+    print(f"\nBuilding Team ({len(team) + 1}/6)")
     while len(team) < 6:
         best_candidate = None
         best_score = -1
         candidates_evaluated = 0
 
-        print(f"   Evaluating candidates for slot {len(team) + 1}...")
-
         candidates_to_evaluate = list(available_pokemon)[:100]
         for pokemon_name in candidates_to_evaluate:
-            normalized_name = normalize_for_comparison(pokemon_name)
+            candidate_normalized = normalize_for_comparison(pokemon_name)
             if any(
-                normalize_for_comparison(member.pokemon.name) == normalized_name for member in team
+                normalize_for_comparison(member.pokemon.name) == candidate_normalized
+                for member in team
             ):
                 continue
 
             pokemon = get_pokemon(pokemon_name)
+            if not pokemon:
+                continue
+
             sets = get_pokemon_sets(pokemon_name)
-            if not pokemon or not sets:
+            if not sets:
                 continue
 
             candidates_evaluated += 1
@@ -162,24 +157,26 @@ def build_team(seed_name: str) -> list[TeamMember]:
                     best_score = score
                     best_candidate = (pokemon, pokemon_set)
 
-            if best_candidate:
-                team.append(TeamMember(pokemon=best_candidate[0], set=best_candidate[1]))
-                print(
-                    f"  Added {best_candidate[0].name} ({best_candidate[1].name}) - Score: {best_score:.2f}"
-                )
-                print(f"  Evaluated {candidates_evaluated} candidates")
-                print(
-                    f"  Moves: {', '.join(best_candidate[1].moves[:3])}{'...' if len(best_candidate[1].moves) > 3 else ''}"
-                )
-                print(f"  Item: {best_candidate[1].item}")
-                print(f"  Ability: {best_candidate[1].ability}")
+        if best_candidate:
+            team.append(TeamMember(pokemon=best_candidate[0], set=best_candidate[1]))
+            print(
+                f"├─ Added {best_candidate[0].name.title()} ({best_candidate[1].name}) ({best_score:.2f})"
+            )
+            print(
+                f"├─ Moves: {', '.join(best_candidate[1].moves[:3])}{'...' if len(best_candidate[1].moves) > 3 else ''}"
+            )
+            print(f"├─ Item: {best_candidate[1].item}")
+            print(f"╰─ Ability: {best_candidate[1].ability}")
 
-                new_roles = identify_roles(best_candidate[1])
-                for role in new_roles:
-                    if role in team_needs and team_needs[role]:
-                        team_needs[role].pop(0)
-            else:
-                print(f"No more suitable candidates found ({candidates_evaluated} evaluated)")
-                break
+            new_roles = identify_roles(best_candidate[1])
+            for role in new_roles:
+                if role in team_needs and team_needs[role]:
+                    team_needs[role].pop(0)
+        else:
+            print(f"No more suitable candidates found ({candidates_evaluated} evaluated)")
+            break
+
+        if len(team) < 6:
+            print(f"\nBuilding team (slot {len(team) + 1}/6)...")
 
     return team
