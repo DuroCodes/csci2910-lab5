@@ -83,16 +83,16 @@ def get_type_coverage_needs(seed_pokemon: Pokemon) -> list[str]:
     return list(set(needs))
 
 
-def build_team(seed_name: str) -> list[TeamMember]:
+def build_team(seed_name: str, gen=8) -> list[TeamMember]:
     print(f"Fetching data for {seed_name}...")
     seed_pokemon = get_pokemon(seed_name)
     if not seed_pokemon:
         print(f"Could not find Pokémon: {seed_name}")
         return []
 
-    seed_sets = get_pokemon_sets(seed_pokemon.name.title())
+    seed_sets = get_pokemon_sets(seed_pokemon.name.title(), gen)
     if not seed_sets:
-        print(f"No sets found for {seed_pokemon.name} in gen8")
+        print(f"No sets found for {seed_pokemon.name} in generation {gen}")
         return []
 
     seed_set = seed_sets[0]
@@ -123,7 +123,7 @@ def build_team(seed_name: str) -> list[TeamMember]:
     print(f"╰─ Types needed: {', '.join(team_needs[Role.TYPE_COVERAGE])}")
 
     print("\nFetching available Pokémon...")
-    available_pokemon = get_available_pokemon_names()
+    available_pokemon = get_available_pokemon_names(gen)
     print(f"╰─ Found {len(available_pokemon)} available Pokémon")
 
     print(f"\nBuilding team ({len(team) + 1}/6)")
@@ -145,7 +145,7 @@ def build_team(seed_name: str) -> list[TeamMember]:
             if not pokemon:
                 continue
 
-            sets = get_pokemon_sets(pokemon_name)
+            sets = get_pokemon_sets(pokemon_name, gen)
             if not sets:
                 continue
 

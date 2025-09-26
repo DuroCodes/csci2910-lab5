@@ -5,13 +5,14 @@ from team_builder import build_team
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Build a Pokemon team")
     parser.add_argument("pokemon", nargs="?", help="Pokemon name to build team around")
+    parser.add_argument("--gen", "-g", type=int, default=8, help="Pokemon generation (default: 8)")
     args = parser.parse_args()
 
     pokemon_name = args.pokemon
     if not pokemon_name:
         pokemon_name = input("Enter Pokemon name: ").strip()
 
-    team = build_team(pokemon_name)
+    team = build_team(pokemon_name, gen=args.gen)
     if not team:
         print("No team found")
         exit(1)
