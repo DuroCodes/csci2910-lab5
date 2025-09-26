@@ -98,7 +98,7 @@ def build_team(seed_name: str) -> list[TeamMember]:
     seed_set = seed_sets[0]
     team = [TeamMember(seed_pokemon, seed_set)]
 
-    print(f"\nSelected Set: {seed_set.name} ({seed_pokemon.name})")
+    print(f"\nSelected Set: {seed_pokemon.name.title()} ({seed_set.name})")
     print(f"├─ Moves: {', '.join(seed_set.moves[:3])}{'...' if len(seed_set.moves) > 3 else ''}")
     print(f"├─ Item: {seed_set.item}")
     print(f"╰─ Ability: {seed_set.ability}")
