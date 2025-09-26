@@ -22,7 +22,7 @@ Once the roles are identified, the system will create a team of 6 Pokémon that 
 ## TODO
 
 - [x] Set up project files (main.py, requirements.txt)
-- [ ] Make Pokemon data classes
+- [x] Make Pokemon data classes
 - [ ] Build PokeAPI client to get Pokemon info
 - [ ] Build Smogon client to get competitive sets
 - [ ] Figure out what roles Pokemon can fill
