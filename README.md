@@ -19,20 +19,10 @@ Once the roles are identified, the system will create a team of 6 Pokémon that 
 - Utility → Pokémon with knock off, toxic, thunder wave, taunt, or encore
 - Setup Sweeper → Pokémon with swords dance, nasty plot, calm mind, or dragon dance
 
-## TODO
+## Usage
 
-- [x] Set up project files (main.py, requirements.txt)
-- [x] Make Pokemon data classes
-- [x] Build PokeAPI client to get Pokemon info
-- [x] Build Smogon client to get competitive sets
-- [x] Figure out what roles Pokemon can fill
-- [x] Score Pokemon based on team needs
-- [x] Build the main team building logic
-- [x] Add caching to make it faster
-- [x] Add parallel data fetching
-- [x] Make Showdown team format output
-- [x] Make PokePaste output
-- [ ] Add command line interface
-- [x] Handle errors gracefully
-- [x] Add progress messages
-- [x] Test with different Pokemon
+```bash
+python main.py <pokemon_name>
+```
+
+If no Pokemon name is provided, you will be prompted to enter one.
