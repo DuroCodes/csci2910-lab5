@@ -84,7 +84,7 @@ def get_type_coverage_needs(seed_pokemon: Pokemon) -> list[str]:
 
 
 def build_team(seed_name: str, gen=8) -> list[TeamMember]:
-    print(f"Fetching data for {seed_name}...")
+    print(f"Fetching data for {seed_name.title()}...")
     seed_pokemon = get_pokemon(seed_name)
     if not seed_pokemon:
         print(f"Could not find Pokémon: {seed_name}")
