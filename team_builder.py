@@ -1,5 +1,6 @@
 import enum
 from models import Pokemon, PokemonSet, TeamMember
+from pokeapi import get_type_weaknesses
 
 
 @enum.unique
@@ -61,3 +62,19 @@ def score_pokemon(
     score -= 0.5 * sum(1 for type in pokemon.types if type in current_types)
 
     return score
+
+
+def get_type_coverage_needs(seed_pokemon: Pokemon) -> set[str]:
+    needs = set()
+    weaknesses = get_type_weaknesses(seed_pokemon)
+
+    # always want to include steel for resists (https://www.youtube.com/watch?v=tBlnHwwax44)
+    needs.add("steel")
+    major_weaknesses = [t for t, mult in weaknesses.items() if mult >= 2.0]
+
+    coverage_map = {"steel": "fire", "poison": "steel", "ground": "flying"}
+    needs.update(
+        coverage_map[weakness] for weakness in major_weaknesses if weakness in coverage_map
+    )
+
+    return needs
