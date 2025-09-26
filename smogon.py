@@ -25,7 +25,10 @@ def get_pokemon_sets(pokemon_name: str, gen=8) -> list[PokemonSet]:
     pokemon_sets = []
 
     if pokemon_name in sets_data:
-        for _, tier_data in sets_data[pokemon_name].items():
+        for tier_name, tier_data in sets_data[pokemon_name].items():
+            if tier_name.lower() in ["almostanyability", "godlygift"]:
+                continue
+
             for set_name, set_data in tier_data.items():
                 # some moves are arrays, so we need to flatten them
                 moves = [get_first_item(move) for move in set_data.get("moves", [])]
