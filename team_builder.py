@@ -1,6 +1,8 @@
 import enum
 from models import Pokemon, PokemonSet, TeamMember
-from pokeapi import get_type_weaknesses
+from pokeapi import get_pokemon, get_type_weaknesses
+from smogon import get_pokemon_sets, get_available_pokemon_names
+from utils import normalize_for_comparison
 
 
 @enum.unique
@@ -11,6 +13,7 @@ class Role(enum.Enum):
     PIVOT = "pivot"
     UTILITY = "utility"
     SETUP_SWEEPER = "setup_sweeper"
+    TYPE_COVERAGE = "type_coverage"
 
 
 def identify_roles(pokemon_set: PokemonSet) -> list[Role]:
@@ -42,7 +45,7 @@ def identify_roles(pokemon_set: PokemonSet) -> list[Role]:
 def score_pokemon(
     pokemon: Pokemon,
     pokemon_set: PokemonSet,
-    team_needs: dict[str, list[str]],
+    team_needs: dict[Role, list[str]],
     current_team: list[TeamMember],
 ) -> float:
     score = 0.0
@@ -64,17 +67,119 @@ def score_pokemon(
     return score
 
 
-def get_type_coverage_needs(seed_pokemon: Pokemon) -> set[str]:
-    needs = set()
+def get_type_coverage_needs(seed_pokemon: Pokemon) -> list[str]:
+    needs = []
     weaknesses = get_type_weaknesses(seed_pokemon)
 
     # always want to include steel for resists (https://www.youtube.com/watch?v=tBlnHwwax44)
-    needs.add("steel")
+    needs.append("steel")
     major_weaknesses = [t for t, mult in weaknesses.items() if mult >= 2.0]
 
     coverage_map = {"steel": "fire", "poison": "steel", "ground": "flying"}
-    needs.update(
+    needs.extend(
         coverage_map[weakness] for weakness in major_weaknesses if weakness in coverage_map
     )
 
-    return needs
+    return list(set(needs))
+
+
+def build_team(seed_name: str) -> list[TeamMember]:
+    print(f"Building a team with seed: {seed_name}\n")
+
+    print(f"Fetching data for {seed_name}...")
+    seed_pokemon = get_pokemon(seed_name)
+    if not seed_pokemon:
+        print(f"Could not find Pokémon: {seed_name}")
+        exit(1)  # can't do much without the seed pokemon
+
+    print(f"Found {seed_pokemon.name} ({seed_pokemon.types})")
+
+    print(f"Fetching sets for {seed_pokemon.name}...")
+    seed_sets = get_pokemon_sets(seed_pokemon.name.title())  # smogon format
+    if not seed_sets:
+        print(f"No sets found for {seed_pokemon.name}")
+        exit(1)  # can't build a team without a seed set
+
+    print(f"Found {len(seed_sets)} competitive sets")
+
+    # use first set as seed set
+    seed_set = seed_sets[0]
+    team = [TeamMember(seed_pokemon, seed_set)]
+
+    print(f"Selected set: {seed_set.name}")
+    print(f"├─ Moves: {', '.join(seed_set.moves[:3])}{'...' if len(seed_set.moves) > 3 else ''}")
+    print(f"├─ Item: {seed_set.item}")
+    print(f"╰─ Ability: {seed_set.ability}")
+
+    team_needs = {
+        Role.HAZARD_SETTER: [],
+        Role.HAZARD_REMOVER: [],
+        Role.SPEED_CONTROL: [],
+        Role.PIVOT: [],
+        Role.UTILITY: [],
+        Role.SETUP_SWEEPER: [],
+        Role.TYPE_COVERAGE: get_type_coverage_needs(seed_pokemon),
+    }
+
+    for role in team_needs:
+        if role not in identify_roles(seed_set):
+            team_needs[role].append(1)
+
+    print(f"Team needs: {team_needs}")
+    print(f"Type coverage needed: {team_needs[Role.TYPE_COVERAGE]}")
+
+    print("Fetching available Pokémon in generation...")
+    available_pokemon = get_available_pokemon_names()
+    print(f"Available Pokémon: {len(available_pokemon)}")
+
+    print(f"Building team slot {len(team) + 1}/6...")
+
+    while len(team) < 6:
+        best_candidate = None
+        best_score = -1
+        candidates_evaluated = 0
+
+        print(f"   Evaluating candidates for slot {len(team) + 1}...")
+
+        candidates_to_evaluate = list(available_pokemon)[:100]
+        for pokemon_name in candidates_to_evaluate:
+            normalized_name = normalize_for_comparison(pokemon_name)
+            if any(
+                normalize_for_comparison(member.pokemon.name) == normalized_name for member in team
+            ):
+                continue
+
+            pokemon = get_pokemon(pokemon_name)
+            sets = get_pokemon_sets(pokemon_name)
+            if not pokemon or not sets:
+                continue
+
+            candidates_evaluated += 1
+
+            for pokemon_set in sets:
+                score = score_pokemon(pokemon, pokemon_set, team_needs, team)
+                if score > best_score:
+                    best_score = score
+                    best_candidate = (pokemon, pokemon_set)
+
+            if best_candidate:
+                team.append(TeamMember(pokemon=best_candidate[0], set=best_candidate[1]))
+                print(
+                    f"  Added {best_candidate[0].name} ({best_candidate[1].name}) - Score: {best_score:.2f}"
+                )
+                print(f"  Evaluated {candidates_evaluated} candidates")
+                print(
+                    f"  Moves: {', '.join(best_candidate[1].moves[:3])}{'...' if len(best_candidate[1].moves) > 3 else ''}"
+                )
+                print(f"  Item: {best_candidate[1].item}")
+                print(f"  Ability: {best_candidate[1].ability}")
+
+                new_roles = identify_roles(best_candidate[1])
+                for role in new_roles:
+                    if role in team_needs and team_needs[role]:
+                        team_needs[role].pop(0)
+            else:
+                print(f"No more suitable candidates found ({candidates_evaluated} evaluated)")
+                break
+
+    return team

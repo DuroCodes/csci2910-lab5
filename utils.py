@@ -94,3 +94,6 @@ def normalize_pokemon_name(name: str) -> str:
         return name_mappings[normalized]
 
     return name
+
+def normalize_for_comparison(name: str) -> str:
+    return normalize_pokemon_name(name).lower().replace(" ", "").replace("'", "").replace(".", "")
