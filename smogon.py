@@ -2,6 +2,7 @@ import requests
 from functools import lru_cache
 
 from models import PokemonSet
+from utils import get_first_item
 
 
 BASE_URL = "https://pkmn.github.io/smogon/data/sets"
@@ -27,18 +28,18 @@ def get_pokemon_sets(pokemon_name: str, gen=8) -> list[PokemonSet]:
         for _, tier_data in sets_data[pokemon_name].items():
             for set_name, set_data in tier_data.items():
                 # some moves are arrays, so we need to flatten them
-                moves = [
-                    move[0] if isinstance(move, list) else move
-                    for move in set_data.get("moves", [])
-                ]
+                moves = [get_first_item(move) for move in set_data.get("moves", [])]
+                item = get_first_item(set_data.get("item", ""))
+                ability = get_first_item(set_data.get("ability", ""))
+                nature = set_data.get("nature", "")
 
                 pokemon_sets.append(
                     PokemonSet(
                         name=set_name,
                         moves=moves,
-                        ability=set_data.get("ability", ""),
-                        item=set_data.get("item", ""),
-                        nature=set_data.get("nature", ""),
+                        ability=ability,
+                        item=item,
+                        nature=nature,
                         evs=set_data.get("evs", {}),
                     )
                 )

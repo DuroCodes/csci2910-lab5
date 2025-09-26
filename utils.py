@@ -1,3 +1,6 @@
+from models import TeamMember
+
+
 def normalize_pokemon_name(name: str) -> str:
     """Smogon's sets use different naming scheme than PokeAPI, so we need to normalize certain Pokémon names"""
 
@@ -95,5 +98,10 @@ def normalize_pokemon_name(name: str) -> str:
 
     return name
 
+
 def normalize_for_comparison(name: str) -> str:
     return normalize_pokemon_name(name).lower().replace(" ", "").replace("'", "").replace(".", "")
+
+
+def get_first_item(item: str | list[str]) -> str:
+    return item[0] if isinstance(item, list) else item

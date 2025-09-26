@@ -28,10 +28,11 @@ Once the roles are identified, the system will create a team of 6 Pokémon that 
 - [x] Figure out what roles Pokemon can fill
 - [x] Score Pokemon based on team needs
 - [x] Build the main team building logic
-- [ ] Add caching to make it faster
-- [ ] Add parallel data fetching
-- [ ] Make Showdown team format output
+- [x] Add caching to make it faster
+- [x] Add parallel data fetching
+- [x] Make Showdown team format output
+- [x] Make PokePaste output
 - [ ] Add command line interface
-- [ ] Handle errors gracefully
-- [ ] Add progress messages
-- [ ] Test with different Pokemon
+- [x] Handle errors gracefully
+- [x] Add progress messages
+- [x] Test with different Pokemon
