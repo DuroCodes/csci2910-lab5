@@ -1,6 +1,7 @@
 # CSCI 2910 - Lab 5 (Pokémon Team Builder)
 
-> [!WARNING] This probably isn't very polished, but it works (for the most part)
+> [!WARNING]
+> This probably isn't very polished, but it works (for the most part)
 
 ## Overview
 
