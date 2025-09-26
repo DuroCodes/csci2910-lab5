@@ -1,6 +1,5 @@
 import enum
-from dist.main import PokemonSet
-
+from models import PokemonSet
 
 @enum.unique
 class Role(enum.Enum):
@@ -36,3 +35,5 @@ def identify_roles(pokemon_set: PokemonSet) -> list[str]:
         roles.append(Role.SETUP_SWEEPER)
 
     return roles
+
+
