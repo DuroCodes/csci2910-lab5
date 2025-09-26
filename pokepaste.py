@@ -1,5 +1,4 @@
 import requests
-from urllib.parse import urlencode
 from models import TeamMember
 
 
