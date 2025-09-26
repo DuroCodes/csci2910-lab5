@@ -1,4 +1,5 @@
 from collections import defaultdict
+from functools import lru_cache
 from models import Pokemon
 from utils import normalize_pokemon_name
 import requests
@@ -7,6 +8,7 @@ import requests
 BASE_URL = "https://pokeapi.co/api/v2/"
 
 
+@lru_cache(maxsize=128)
 def get_pokemon(name: str) -> Pokemon | None:
     try:
         api_name = normalize_pokemon_name(name)

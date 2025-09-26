@@ -1,4 +1,5 @@
 import requests
+from functools import lru_cache
 
 from models import PokemonSet
 
@@ -6,6 +7,7 @@ from models import PokemonSet
 BASE_URL = "https://pkmn.github.io/smogon/data/sets"
 
 
+@lru_cache(maxsize=8)
 def get_gen_sets(gen=8) -> dict[str, dict[str, dict]]:
     try:
         url = f"{BASE_URL}/gen{gen}.json"
@@ -16,6 +18,7 @@ def get_gen_sets(gen=8) -> dict[str, dict[str, dict]]:
         return {}
 
 
+@lru_cache(maxsize=256)
 def get_pokemon_sets(pokemon_name: str, gen=8) -> list[PokemonSet]:
     sets_data = get_gen_sets(gen)
     pokemon_sets = []
@@ -43,5 +46,6 @@ def get_pokemon_sets(pokemon_name: str, gen=8) -> list[PokemonSet]:
     return pokemon_sets
 
 
+@lru_cache(maxsize=8)
 def get_available_pokemon_names(gen=8) -> set[str]:
     return set(get_gen_sets(gen).keys())
