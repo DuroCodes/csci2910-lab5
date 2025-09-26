@@ -126,7 +126,7 @@ def build_team(seed_name: str) -> list[TeamMember]:
     available_pokemon = get_available_pokemon_names()
     print(f"╰─ Found {len(available_pokemon)} available Pokémon")
 
-    print(f"\nBuilding Team ({len(team) + 1}/6)")
+    print(f"\nBuilding team ({len(team) + 1}/6)")
     while len(team) < 6:
         best_candidate = None
         best_score = -1
@@ -162,9 +162,7 @@ def build_team(seed_name: str) -> list[TeamMember]:
             print(
                 f"├─ Added {best_candidate[0].name.title()} ({best_candidate[1].name}) ({best_score:.2f})"
             )
-            print(
-                f"├─ Moves: {', '.join(best_candidate[1].moves[:3])}{'...' if len(best_candidate[1].moves) > 3 else ''}"
-            )
+            print(f"├─ Moves: {', '.join(best_candidate[1].moves[:4])}")
             print(f"├─ Item: {best_candidate[1].item}")
             print(f"╰─ Ability: {best_candidate[1].ability}")
 
